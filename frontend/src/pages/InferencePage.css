@@ -1,0 +1,91 @@
+/* =========================================
+   Inference Page
+   ========================================= */
+
+.inference-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    animation: slideUp var(--duration-slow) var(--ease-out);
+}
+
+.inference-page.player-open {
+    flex-direction: row;
+    gap: var(--space-6);
+}
+
+.inference-page.player-open .page-header,
+.inference-page.player-open .inference-controls {
+    display: none;
+}
+
+.inference-page.player-open .video-grid {
+    width: 380px;
+    flex-shrink: 0;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-right: var(--space-3);
+}
+
+/* === Controls === */
+.inference-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    align-items: center;
+}
+
+.video-type-toggle {
+    flex-shrink: 0;
+}
+
+/* === Video Grid === */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-5);
+}
+
+.video-grid.shorts-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+/* === Loading State === */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-12);
+    gap: var(--space-4);
+    color: var(--text-secondary);
+}
+
+/* === Responsive === */
+@media (max-width: 1200px) {
+    .inference-page.player-open .video-grid {
+        width: 280px;
+    }
+}
+
+@media (max-width: 900px) {
+    .inference-page.player-open {
+        flex-direction: column;
+    }
+
+    .inference-page.player-open .video-grid {
+        width: 100%;
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 640px) {
+    .video-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .inference-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

@@ -1,0 +1,81 @@
+# Git
+.git/
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+backend/airflow/logs/
+
+# Data files (large files shouldn't be in image)
+data/raw/videos/
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Docker
+docker-compose.yml
+*.Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Test files
+test*.py
+*_test.py
+tests/
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# MinIO data
+minio-data/
+
+# Postgres data
+pgdata/

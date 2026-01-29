@@ -1,0 +1,268 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: video_classifier_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init-db:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - video_classifier_network
+
+  minio:
+    image: minio/minio:latest
+    container_name: video_classifier_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - video_classifier_network
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: video_classifier_minio_init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb myminio/${MINIO_BUCKET} --ignore-existing;
+      /usr/bin/mc anonymous set download myminio/${MINIO_BUCKET};
+      exit 0;
+      "
+    networks:
+      - video_classifier_network
+
+  # ===== Kafka =====
+  # Note: Redis removed - using Kafka for all queuing
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: video_classifier_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    networks:
+      - video_classifier_network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: video_classifier_kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168  # 7 days
+      KAFKA_MESSAGE_MAX_BYTES: 10485760  # 10MB
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - video_classifier_network
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: video_classifier_kafka_init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Creating Kafka topics...' &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic video-preprocessing --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic video-inference --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic video-training --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic video-status --partitions 3 --replication-factor 1 &&
+      echo 'Topics created successfully!' &&
+      kafka-topics --bootstrap-server kafka:9092 --list
+      "
+    networks:
+      - video_classifier_network
+
+  # ===== API Service (separate container) =====
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    image: video_classifier_api
+    container_name: video_classifier_api
+    environment:
+      - APP_BASE_DIR=/app
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - MODEL_MODE=${MODEL_MODE}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - MINIO_HOST=${MINIO_HOST}
+      - MINIO_PORT=${MINIO_PORT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      # Kafka
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      # Airflow API for triggering DAGs
+      - AIRFLOW_API_URL=http://airflow:8080
+      - AIRFLOW_USERNAME=admin
+      - AIRFLOW_PASSWORD=admin
+    volumes:
+      # Development: mount code for hot reload
+      - ./backend/common:/app/common:ro
+      - ./backend/api:/app/api:ro
+      - ./backend/main.py:/app/main.py:ro
+      - ./config:/app/config:ro
+      - ./data:/app/data
+    ports:
+      - "8001:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - video_classifier_network
+    restart: unless-stopped
+
+  # ===== Airflow (scheduler, webserver, workers) =====
+  airflow:
+    build:
+      context: .
+      dockerfile: docker/airflow.Dockerfile
+    image: video_classifier_airflow_base
+    container_name: video_classifier_airflow
+    environment:
+      - AIRFLOW_UID=${AIRFLOW_UID}
+      - AIRFLOW__CORE__EXECUTOR=${AIRFLOW__CORE__EXECUTOR}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW__CORE__FERNET_KEY}
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=${AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION}
+      - AIRFLOW__CORE__LOAD_EXAMPLES=${AIRFLOW__CORE__LOAD_EXAMPLES}
+      - AIRFLOW__CORE__PARALLELISM=${AIRFLOW__CORE__PARALLELISM}
+      - AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG=${AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG}
+      - AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG=${AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG}
+      - AIRFLOW__API__AUTH_BACKENDS=airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session
+      - AIRFLOW__WEBSERVER__SECRET_KEY=airflow_secret_key_change_this
+      - AIRFLOW__WEBSERVER__WEB_SERVER_HOST=0.0.0.0
+      - AIRFLOW__WEBSERVER__WEB_SERVER_PORT=8080
+      - AIRFLOW__WEBSERVER__WORKERS=2
+      - AIRFLOW__WEBSERVER__WORKER_REFRESH_INTERVAL=30
+      # App environment
+      - APP_BASE_DIR=/opt/airflow
+      - MODEL_MODE=${MODEL_MODE}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - MINIO_HOST=${MINIO_HOST}
+      - MINIO_PORT=${MINIO_PORT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_API_KEYS=${GROQ_API_KEYS}
+      # Kafka
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      # Spark configuration
+      - USE_SPARK=${USE_SPARK:-true}
+      - SPARK_MASTER=local[*]
+      - SPARK_DRIVER_MEMORY=${SPARK_DRIVER_MEMORY:-4g}
+      - SPARK_EXECUTOR_MEMORY=${SPARK_EXECUTOR_MEMORY:-4g}
+    volumes:
+      # DAGs and common code
+      - ./backend/airflow/dags:/opt/airflow/dags:ro
+      - ./backend/common:/opt/airflow/common:ro
+      - ./backend/scripts:/opt/airflow/scripts:ro
+      - ./config:/opt/airflow/config:ro
+      - ./data:/opt/airflow/data
+      - airflow-logs:/opt/airflow/logs
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    command: >
+      bash -c '
+      set -e &&
+      echo "Initializing Airflow database..." &&
+      airflow db migrate &&
+      echo "Creating admin user..." &&
+      airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com 2>/dev/null || echo "User already exists" &&
+      echo "Starting scheduler..." &&
+      airflow scheduler &
+      sleep 5 &&
+      echo "Starting webserver on port 8080..." &&
+      exec airflow webserver --host 0.0.0.0 --port 8080
+      '
+    networks:
+      - video_classifier_network
+
+volumes:
+  pgdata:
+  minio-data:
+  airflow-logs:
+  zookeeper-data:
+  zookeeper-logs:
+  kafka-data:
+
+networks:
+  video_classifier_network:
+    driver: bridge

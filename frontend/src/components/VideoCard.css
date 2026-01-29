@@ -1,0 +1,227 @@
+/* =========================================
+   Video Card
+   ========================================= */
+
+.video-card {
+    position: relative;
+    background: var(--bg-surface);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+.video-card:hover {
+    border-color: var(--border-interactive);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.video-card.clickable {
+    cursor: pointer;
+}
+
+.video-card.clickable:hover {
+    border-color: var(--accent-solid);
+    box-shadow: var(--shadow-glow);
+}
+
+/* Regular video variant (16:9) */
+.video-card.regular .video-thumbnail {
+    aspect-ratio: 16/9;
+}
+
+/* Short video variant (9:16 - vertical) */
+.video-card.short {
+    aspect-ratio: auto;
+}
+
+.video-card.short .video-thumbnail {
+    aspect-ratio: 9/16;
+}
+
+/* TikTok video variant (9:16 - same as short but with specific styling) */
+.video-card.tiktok {
+    aspect-ratio: auto;
+}
+
+.video-card.tiktok .video-thumbnail {
+    aspect-ratio: 9/16;
+}
+
+/* === Thumbnail === */
+.video-thumbnail {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: var(--bg-elevated);
+}
+
+.video-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all var(--duration-slow) var(--ease-out);
+}
+
+.video-thumbnail img.blurred {
+    filter: blur(24px) brightness(0.4);
+    transform: scale(1.1);
+}
+
+.video-card:hover .video-thumbnail img:not(.blurred) {
+    transform: scale(1.05);
+}
+
+/* === Thumbnail Overlays === */
+.thumbnail-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    color: white;
+    text-align: center;
+    padding: var(--space-5);
+}
+
+.loading-overlay {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(24, 24, 27, 0.9) 100%);
+}
+
+.loading-spinner-small {
+    width: 28px;
+    height: 28px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--accent-solid);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-overlay span {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+.harmful-overlay {
+    background: linear-gradient(135deg, rgba(199, 118, 118, 0.15) 0%, rgba(0, 0, 0, 0.85) 100%);
+    border: 2px solid var(--danger);
+}
+
+.harmful-overlay.sexual {
+    border-color: var(--cat-sexual);
+}
+
+.harmful-overlay.aggressive {
+    border-color: var(--cat-aggressive);
+}
+
+.harmful-overlay.superstition {
+    border-color: var(--cat-superstition);
+}
+
+.harmful-text {
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+}
+
+.btn-sm {
+    padding: var(--space-2) var(--space-4);
+    font-size: 0.75rem;
+    border-radius: var(--radius-md);
+}
+
+/* === Safe Badge === */
+.safe-badge {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    padding: var(--space-1) var(--space-3);
+    background: var(--safe);
+    border-radius: var(--radius-full);
+    color: white;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: var(--shadow-sm);
+}
+
+/* === Duration === */
+.video-duration {
+    position: absolute;
+    bottom: var(--space-3);
+    right: var(--space-3);
+    padding: var(--space-1) var(--space-2);
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: var(--radius-sm);
+    color: white;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+}
+
+/* === Video Info === */
+.video-info {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.video-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.video-channel {
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+}
+
+.video-stats {
+    display: flex;
+    gap: var(--space-4);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+/* === Inference Result === */
+.video-inference {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.confidence {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+}

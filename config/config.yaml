@@ -1,0 +1,62 @@
+system:
+  mode: ultra_light  # 'ultra_light' or 'balanced'
+  max_ram_gb: 16
+  
+data:
+  max_frames_per_video: 32
+  frame_sample_method: uniform  # 'uniform' or 'keyframe'
+  frame_width: 224
+  frame_height: 224
+  audio_sample_rate: 16000
+  
+models:
+  ultra_light:
+    text_encoder: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2  # Best for Vietnamese + multilingual
+    image_encoder: efficientnet-b0
+    text_embedding_dim: 384  # MiniLM = 384 dims
+    image_embedding_dim: 1280  # EfficientNet-B0 raw output (keep for cache compatibility)
+    hidden_dim: 256
+    num_classes: 5
+  
+  balanced:
+    text_encoder: VoVanPhuc/sup-SimCSE-VietNamese-phobert-base  # SimCSE fine-tuned PhoBERT
+    image_encoder: resnet50  # Pretrained ResNet50
+    text_embedding_dim: 768  # PhoBERT = 768 dims
+    image_embedding_dim: 2048  # ResNet50 raw output (no dim_reducer for max info)
+    hidden_dim: 512
+    num_classes: 5
+
+fusion:
+  default_weights:
+    Aggressive:
+      w_text: 0.5
+      w_img: 0.5
+    Superstition:
+      w_text: 0.6
+      w_img: 0.4
+    Safe:
+      w_text: 0.5
+      w_img: 0.5
+    Sexual:
+      w_text: 0.2
+      w_img: 0.8
+
+training:
+  batch_size: 16
+  learning_rate: 0.0001
+  num_epochs: 10
+  val_split: 0.1
+  test_split: 0.1
+  early_stopping_patience: 3
+  
+preprocessing:
+  whisper_model: small
+  whisper_device: cpu
+  ffmpeg_threads: 2
+  
+labels:
+  classes:
+    - Aggressive
+    - Sexual
+    - Superstition
+    - Safe

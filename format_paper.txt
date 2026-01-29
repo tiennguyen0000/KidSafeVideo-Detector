@@ -1,0 +1,31 @@
+Introduction (Giới thiệu)
+Bối cảnh, tầm quan trọng của vấn đề.
+Khoảng trống nghiên cứu (research gap) hoặc hạn chế của các hướng cũ.
+Mục tiêu nghiên cứu của đề tài, câu hỏi nghiên cứu.
+Đóng góp chính của đề tài.
+Related Work / Literature Review (Công trình liên quan / Tổng quan nghiên cứu)
+Trình bày các hướng nghiên cứu, mô hình, phương pháp đã có.
+So sánh, phân loại, nêu rõ điểm mạnh và hạn chế.
+Chỉ ra khoảng trống mà bài của bạn sẽ giải quyết.
+Methodology / Proposed Method / System Design (Phương pháp đề xuất / Mô hình)
+Mô tả chi tiết phương pháp, thuật toán, mô hình, kiến trúc hệ thống.
+Có thể gồm: mô hình toán học, pipeline, sơ đồ khối, thuật toán giả (pseudo-code).
+Nêu rõ giả định, tham số, quy trình thực hiện.
+Experiments and Results (Thực nghiệm và kết quả)
+Dataset & Experimental Setup: dữ liệu dùng, tiền xử lý, chia tập, môi trường cài đặt (hardware, software).
+Evaluation Metrics: chỉ số đánh giá (Accuracy, F1, AUC, RMSE, v.v.).
+Results: bảng kết quả, hình vẽ, biểu đồ.
+Comparison: so sánh với các phương pháp baseline / state-of-the-art.
+Discussion (Thảo luận – nếu tạp chí yêu cầu rõ)
+Phân tích ý nghĩa kết quả, tại sao mô hình hoạt động tốt / chưa tốt.
+Những quan sát thú vị, case study.
+Hạn chế (limitations) và các yếu tố có thể ảnh hưởng đến kết quả.
+
+Conclusion and Future Work (Kết luận và hướng phát triển)
+Tóm tắt ngắn gọn vấn đề, phương pháp, kết quả chính.
+Nhấn mạnh đóng góp của đề tài.
+Đề xuất các hướng nghiên cứu tiếp theo, mở rộng mô hình/dữ liệu/ứng dụng.
+References (Tài liệu tham khảo)
+Trích dẫn đầy đủ theo format của hội nghị/tạp chí (IEEE, APA, ACM, Springer LNCS…).
+Lưu ý: Từ 20 trang trở lại, tập trung nội dung phần mô hình, xây dựng dữ liệu (nếu có xây dựng), kết quả thực nghiệm, so sánh và đánh giá các khía cạnh kết quả.
+

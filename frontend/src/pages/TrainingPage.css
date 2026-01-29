@@ -1,0 +1,262 @@
+/* =========================================
+   Training Page
+   ========================================= */
+
+.training-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    animation: slideUp var(--duration-slow) var(--ease-out);
+}
+
+/* === Training Grid === */
+.training-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: var(--space-6);
+}
+
+/* === Card Body === */
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.card-description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.card-description code {
+    background: var(--bg-elevated);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    font-family: var(--font-mono);
+    color: var(--accent-solid);
+}
+
+.btn-lg {
+    padding: var(--space-4) var(--space-6);
+    font-size: 0.9375rem;
+}
+
+/* === Ingest Options === */
+.ingest-options {
+    padding: var(--space-4);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+}
+
+/* === CSV File Selection === */
+.csv-select-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+}
+
+.csv-select-group label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.csv-select-group .select {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.csv-select-group .select:focus {
+    outline: none;
+    border-color: var(--accent-solid);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.csv-select-group .btn-sm {
+    padding: var(--space-2) var(--space-3);
+    font-size: 1rem;
+    min-width: 36px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-solid);
+    cursor: pointer;
+}
+
+.checkbox-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* === Pipeline Info === */
+.pipeline-toggle {
+    margin-bottom: var(--space-4);
+}
+
+.pipeline-info {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-elevated);
+}
+
+.pipeline-success {
+    border-color: rgba(52, 211, 153, 0.3);
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.05) 0%, transparent 100%);
+}
+
+.pipeline-accent {
+    border-color: var(--accent-glow);
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.08) 0%, transparent 100%);
+}
+
+.pipeline-info h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: var(--space-3);
+}
+
+.pipeline-models ul {
+    margin: var(--space-2) 0;
+    padding-left: var(--space-5);
+}
+
+.pipeline-models li {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-1);
+}
+
+.pipeline-fusion {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+
+/* === Models Table === */
+.models-table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+}
+
+.models-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.models-table th,
+.models-table td {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.models-table th {
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    background: var(--bg-elevated);
+}
+
+.models-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.models-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.status-active {
+    color: var(--safe);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.status-active::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--safe);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--safe);
+}
+
+.status-inactive {
+    color: var(--text-muted);
+}
+
+.metrics {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+}
+
+.empty-models {
+    text-align: center;
+    padding: var(--space-10);
+    color: var(--text-secondary);
+}
+
+/* === Fusion Config === */
+.fusion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-4);
+}
+
+.fusion-mode {
+    padding: var(--space-4);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+}
+
+.fusion-mode h4 {
+    margin-bottom: var(--space-3);
+    text-transform: uppercase;
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+
+.fusion-mode pre {
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    color: var(--text-primary);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .training-grid {
+        grid-template-columns: 1fr;
+    }
+}

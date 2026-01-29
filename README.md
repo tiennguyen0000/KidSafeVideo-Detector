@@ -137,7 +137,7 @@ docker-compose logs -f
 docker-compose ps
 ```
 
-**Thời gian khởi động:** ~2-5 phút (lần đầu cần build Docker images)
+**Thời gian khởi động:** ~1 tiếng (lần đầu cần build Docker images)
 
 ### 5. Ingest Dataset
 
